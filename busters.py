@@ -40,6 +40,7 @@ SONAR_DENOMINATOR = 2 ** SONAR_MAX  + 2 ** (SONAR_MAX + 1) - 2.0
 SONAR_NOISE_PROBS = [2 ** (SONAR_MAX-abs(v)) / SONAR_DENOMINATOR  for v in SONAR_NOISE_VALUES]
 
 def getNoisyDistance(pos1, pos2):
+    #print('Pos1:', pos1, 'pos2:', pos2)
     if pos2[1] == 1: return None
     distance = util.manhattanDistance(pos1, pos2)
     return max(0, distance + util.sample(SONAR_NOISE_PROBS, SONAR_NOISE_VALUES))
@@ -103,6 +104,7 @@ class GameState:
 
         # Copy current state
         state = GameState(self)
+
 
         # Let agent's logic deal with its action's effects on the board
         if agentIndex == 0:  # Pacman is moving
