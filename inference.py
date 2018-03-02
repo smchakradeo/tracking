@@ -150,36 +150,25 @@ class ExactInference(InferenceModule):
 
         "*** YOUR CODE HERE ***"
 
-
-        """print("observation", observation)
-        print('emissionModel', busters.getObservationDistribution(noisyDistance))
-        print('pacManPosition', gameState.getPacmanPosition())"""
+        count = 0
 
 
-        # Replace this code with a correct observation update
-        # Be sure to handle the "jail" edge case where the ghost is eaten
-        # and noisyDistance is None
         allPossible = util.Counter()
-        for p in self.legalPositions:
-            trueDistance = util.manhattanDistance(p, pacmanPosition)
-            #print("trueDistance:", trueDistance)
-            if noisyDistance == None:
-                allJailPosition = self.getJailPosition()
-                for position in self.legalPositions:
-                    position = 0
-                    allPossible[allJailPosition] = 1
-            else:
 
-                allPossible[p] = self.beliefs[p]*emissionModel[trueDistance]
-                if noisyDistance == 0:
-                    trueDistance = self.getJailPosition()
-                self.beliefs[p] = 1.0
-                self.beliefs.normalize()
-
-        "*** END YOUR CODE HERE ***"
-
-        #allPossible.normalize()
+        if noisyDistance == None:
+            count = 1
+        else:
+            for p in self.legalPositions:
+                trueDistance = util.manhattanDistance(p, pacmanPosition)
+                if emissionModel[trueDistance] > 0:
+                    allPossible[p] = emissionModel[trueDistance] * self.beliefs[p]
+                    #print('allPossible:', allPossible)
+        if count == 0:
+            allPossible.normalize()
+        elif count == 1:
+            allPossible[self.getJailPosition()] = 1.0
         self.beliefs = allPossible
+        "*** END YOUR CODE HERE ***"
 
     def elapseTime(self, gameState):
         """1
@@ -236,17 +225,19 @@ class ExactInference(InferenceModule):
         """
         "*** YOUR CODE HERE ***"
         allPossible = util.Counter()
-        for oldPos in self.legalPositions:
-            #print("oldPostion:", oldPos)
-            newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, oldPos))
-            #print("NewPostion:", newPosDist)
+        #self.initializeUniformly(gameState)
+        for p in self.legalPositions:
+            newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, p))
 
             for newPos, prob in newPosDist.items():
-                allPossible[newPos] += prob*self.beliefs[oldPos]
+                allPossible[newPos] += prob * self.beliefs[p]
 
         allPossible.normalize()
         self.beliefs = allPossible
-        # util.raiseNotDefined()
+
+
+    def getBeliefDistribution(self):
+        return self.beliefs
 
     def getBeliefDistribution(self):
         return self.beliefs
